@@ -3,5 +3,7 @@ numpy
 matplotlib
 joblib
 plotly
+seaborn
+pillow
 shap
 streamlit

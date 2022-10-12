@@ -15,7 +15,6 @@ import shap
 path = Path(__file__).parent
 path_data = path.joinpath('Data')
 
-
 st.set_page_config(page_title='PRET A DEPENSER - Scoring Client', layout='wide')
 
 

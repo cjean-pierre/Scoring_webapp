@@ -4,7 +4,7 @@ Function that sends a request to the MLflow model REST API to get score predicti
 
 import requests
 
-MODEL_API_URL = 'https://fastapiroku-ml.herokuapp.com/predict'
+MODEL_API_URL = 'https://place-de-marche-ml.herokuapp.com/predict'
 
 
 def predict():

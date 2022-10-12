@@ -2,15 +2,19 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
+import matplotlib.colors
 import seaborn as sns
 from PIL import Image
-import pandas as pd
+import numpy as np
 from pathlib import Path
-from lgbm_shap import *
+from joblib import load
+from ml_model import predict
+import shap
+
 
 path = Path(__file__).parent
 path_data = path.joinpath('Data')
-# st.write(os.getcwd(), path)
+
 
 st.set_page_config(page_title='PRET A DEPENSER - Scoring Client', layout='wide')
 
@@ -18,16 +22,20 @@ st.set_page_config(page_title='PRET A DEPENSER - Scoring Client', layout='wide')
 @st.cache(allow_output_mutation=True)
 def load_data():
 
-    train_df = pd.read_csv(path/'proc_train_df.csv', index_col=0)
-    test_df = pd.read_csv(path/'test_preds.csv', index_col=0).reset_index(drop=True)
-    contribs_df = np.array(pd.read_csv(path/'test_contribs.csv', index_col=0))
-    app_test_df = pd.read_csv(path_data/'application_test.csv')
-    app_train_df = pd.read_csv(path_data/'application_train.csv')
+    app_train_df = load(path / 'resources' / 'app_train.joblib')
+    train_df = load(path / 'resources' / 'train_set.joblib')
+    features = load(path / 'resources' / 'feats.joblib')
+    prediction = predict()
+    app_test_df = prediction[0]
+    test_df = prediction[1]
+    shap_vals = prediction[2]
+    exp_vals = prediction[3]
+    shap_sum = prediction[4]
 
-    return train_df, test_df, contribs_df, app_train_df, app_test_df
+    return train_df, test_df, features, app_train_df, app_test_df, shap_vals, exp_vals, shap_sum
 
 
-train, test, contribs, app_train, app_test = load_data()
+train, test, feats, app_train, app_test, shap_values, exp_values, shap_summary = load_data()
 
 
 with st.sidebar:
@@ -137,8 +145,10 @@ with tab1:
     col4, col5 = st.columns([1, 1])
 
     with col4:
-        feats = list(train.columns[2:])
-        shap_values, exp_values, feat_values, feat_names = shap_viz_prep(contribs, feats, test)
+
+        feat_names = [feat.capitalize() for feat in feats]
+        feat_values = np.array(test[feats])
+
         st.set_option('deprecation.showPyplotGlobalUse', False)
         cmap = matplotlib.colors.LinearSegmentedColormap.from_list('score_cmap', colors=cols, N=100)
         fig, ax = plt.subplots(figsize=(5, 10))
@@ -153,8 +163,8 @@ with tab1:
                   clear_figure=True,
                   use_container_width=True)
     with col5:
-        image = Image.open(path / 'shap_summary.png')
-        st.image(image)
+
+        st.image(shap_summary)
 
     st.markdown('\n___')
     st.subheader("Scoring in depth analysis")

@@ -3,6 +3,5 @@ numpy
 matplotlib
 joblib
 plotly
-PIL
 shap
 streamlit

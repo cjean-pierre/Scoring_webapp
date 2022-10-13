@@ -21,20 +21,19 @@ st.set_page_config(page_title='PRET A DEPENSER - Scoring Client', layout='wide')
 @st.cache(allow_output_mutation=True)
 def load_data():
 
-    app_train_df = load(path / 'resources' / 'app_train.joblib')
-    train_df = load(path / 'resources' / 'train_set.joblib')
+    train_df = load(path / 'resources' / 'old_apps.joblib')
     features = load(path / 'resources' / 'feats.joblib')
+    test_df = load(path / 'resources' / 'new_apps.joblib')
     prediction = predict()
-    app_test_df = prediction[0]
-    test_df = prediction[1]
+
     shap_vals = prediction[2]
     exp_vals = prediction[3]
     shap_sum = prediction[4]
 
-    return train_df, test_df, features, app_train_df, app_test_df, shap_vals, exp_vals, shap_sum
+    return train_df, test_df, features, shap_vals, exp_vals, shap_sum
 
 
-train, test, feats, app_train, app_test, shap_values, exp_values, shap_summary = load_data()
+train, test, feats, shap_values, exp_values, shap_summary = load_data()
 
 
 with st.sidebar:
@@ -264,7 +263,7 @@ with tab2:
     col1.metric(label="Age", value=f"{int(years)} years and {months} months", delta=age_delta)
 
     # display customer NAME_EDUCATION_TYPE & NAME_HOUSING_TYPE
-    ed_fam_df = app_test[['SK_ID_CURR', "NAME_EDUCATION_TYPE", "NAME_FAMILY_STATUS", "CNT_CHILDREN"]].copy()
+    ed_fam_df = test[['SK_ID_CURR', "NAME_EDUCATION_TYPE", "NAME_FAMILY_STATUS", "CNT_CHILDREN"]].copy()
     education = ed_fam_df.loc[ed_fam_df['SK_ID_CURR'] == app_id, "NAME_EDUCATION_TYPE"].values[0]
 
     col4.metric(label="Education", value=f"{education}", delta=None)
@@ -296,7 +295,7 @@ with tab2:
     fig.add_vline(x=years, line_width=3,  line_color="black", opacity=0.8)
     st.plotly_chart(fig, use_container_width=False, sharing="streamlit")
 
-    ed_df = app_train[["NAME_EDUCATION_TYPE", "TARGET"]].copy()
+    ed_df = train[["NAME_EDUCATION_TYPE", "TARGET"]].copy()
     fig_ed = px.histogram(ed_df, y="NAME_EDUCATION_TYPE",
                           color="TARGET",
                           title="Client Education",

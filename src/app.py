@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
@@ -13,7 +14,6 @@ import shap
 
 
 path = Path(__file__).parent
-path_data = path.joinpath('Data')
 
 st.set_page_config(page_title='PRET A DEPENSER - Scoring Client', layout='wide')
 
@@ -24,16 +24,10 @@ def load_data():
     train_df = load(path / 'resources' / 'old_apps.joblib')
     features = load(path / 'resources' / 'feats.joblib')
     test_df = load(path / 'resources' / 'new_apps.joblib')
-    prediction = predict()
-
-    shap_vals = prediction[2]
-    exp_vals = prediction[3]
-    shap_sum = prediction[4]
-
-    return train_df, test_df, features, shap_vals, exp_vals, shap_sum
+    return train_df, test_df, features
 
 
-train, test, feats, shap_values, exp_values, shap_summary = load_data()
+train, test, feats, = load_data()
 
 
 with st.sidebar:
@@ -44,11 +38,19 @@ with st.sidebar:
     app_id = st.selectbox('Please select application ID', test['SK_ID_CURR'])
     index = test.loc[test['SK_ID_CURR'] == app_id].index[0]
 
+    json_app = test.loc[test['SK_ID_CURR'] == app_id].to_json(orient='records')
+    predictions = predict(json_app)
+    new_app_pred = pd.read_json(predictions[0])
+    shap_values = pd.read_json(predictions[1])
+    exp_values = predictions[2]
+
+
 tab1, tab2, tab3 = st.tabs(["SCORING   ", "PERSONAL   ", "INCOME & EMPLOYMENT"])
 
 with tab1:
 
-    pred_value = test.loc[test['SK_ID_CURR'] == app_id, 'PREDS']
+    # pred_value = test.loc[test['SK_ID_CURR'] == app_id, 'PREDS']
+    pred_value = new_app_pred['PREDS']
     st.header(f"Application Status")
     if float(pred_value) < 0.3:
         st.success(body="Approved" + "✅")
@@ -96,7 +98,8 @@ with tab1:
     with col2:
         st.subheader("credit amount")
 
-        credit_value = test.loc[test['SK_ID_CURR'] == app_id, 'APPLI_AMT_CREDIT']
+        # credit_value = test.loc[test['SK_ID_CURR'] == app_id, 'APPLI_AMT_CREDIT']
+        credit_value = new_app_pred['APPLI_AMT_CREDIT']
         median_credit = train['APPLI_AMT_CREDIT'].median()
 
         fig3 = go.Figure(go.Indicator(
@@ -114,10 +117,12 @@ with tab1:
         )
 
         st.plotly_chart(fig3, use_container_width=True, sharing="streamlit")
-    # diplay Annuity amount
+
+    # display Annuity amount
     with col3:
         st.subheader("Annuity")
-        annuity_value = test.loc[test['SK_ID_CURR'] == app_id, 'APPLI_AMT_ANNUITY']
+        # annuity_value = test.loc[test['SK_ID_CURR'] == app_id, 'APPLI_AMT_ANNUITY']
+        annuity_value = new_app_pred['APLI_AMT_ANNUITY']
         median_annuity = train['APPLI_AMT_ANNUITY'].median()
 
         fig4 = go.Figure(go.Indicator(
@@ -161,7 +166,7 @@ with tab1:
                   clear_figure=True,
                   use_container_width=True)
     with col5:
-
+        shap_summary = Image.open(path / 'shap_summary.png')
         st.image(shap_summary)
 
     st.markdown('\n___')
@@ -179,8 +184,9 @@ with tab1:
         var_df = train[feats + ["TARGET"]]
 
         def plot_main_variables(variable):
-            # if variable in exp_variables:
-            var_value = float(test.loc[test['SK_ID_CURR'] == app_id, variable])
+
+            # var_value = float(test.loc[test['SK_ID_CURR'] == app_id, variable])
+            var_value = float(new_app_pred.loc[:, variable])
             fig_source, ax0 = plt.subplots()
             for location in ['top', 'right']:
                 ax0.spines[location].set_visible(False)
@@ -207,7 +213,9 @@ with tab1:
 
             df = train[[var0, var1, "TARGET"]].copy()
             df.loc[:, "TARGET"] = df.loc[:, "TARGET"].astype('object')
-            df_app_id = test.loc[test["SK_ID_CURR"] == app_id, [var0, var1]]
+
+            # df_app_id = test.loc[test["SK_ID_CURR"] == app_id, [var0, var1]]
+            df_app_id = new_app_pred.loc[:, [var0, var1]]
 
             fig_biv = px.scatter(df.sample(2500), x=var0, y=var1, color="TARGET",
                                  opacity=0.3,

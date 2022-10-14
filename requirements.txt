@@ -8,3 +8,4 @@ pillow
 shap
 streamlit
 pandas
+fastapi

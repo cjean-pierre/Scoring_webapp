@@ -9,8 +9,10 @@ from PIL import Image
 import numpy as np
 from pathlib import Path
 from joblib import load
-from ml_model import predict
+from ml_model import predict_score
+from ml_model import predict_shap
 import shap
+import json
 
 
 path = Path(__file__).parent
@@ -21,9 +23,9 @@ st.set_page_config(page_title='PRET A DEPENSER - Scoring Client', layout='wide')
 @st.cache(allow_output_mutation=True)
 def load_data():
 
-    train_df = load(path / 'resources' / 'old_apps.joblib')
+    train_df = load(path / 'resources' / 'old_apps.joblib').reset_index(drop=True)
     features = load(path / 'resources' / 'feats.joblib')
-    test_df = load(path / 'resources' / 'new_apps.joblib')
+    test_df = load(path / 'resources' / 'new_apps.joblib').reset_index(drop=True)
     return train_df, test_df, features
 
 
@@ -39,10 +41,11 @@ with st.sidebar:
     index = test.loc[test['SK_ID_CURR'] == app_id].index[0]
 
     json_app = test.loc[test['SK_ID_CURR'] == app_id].to_json(orient='records')
-    predictions = predict(json_app)
-    new_app_pred = pd.read_json(predictions[0], orient='records')
-    shap_values = pd.read_json(predictions[1], orient='index')
-    exp_values = predictions[2]
+    prediction = predict_score(json_app)
+    new_app_pred = pd.read_json(prediction, orient='records')
+    contribs = predict_shap(json_app)
+    shap_values = pd.read_json(contribs[0], orient='index')
+    exp_values = contribs[1]
 
 
 tab1, tab2, tab3 = st.tabs(["SCORING   ", "PERSONAL   ", "INCOME & EMPLOYMENT"])
@@ -165,7 +168,7 @@ with tab1:
                   clear_figure=True,
                   use_container_width=True)
     with col5:
-        shap_summary = Image.open(path / 'shap_summary.png')
+        shap_summary = Image.open(path/'resources'/'shap_summary.png')
         st.image(shap_summary)
 
     st.markdown('\n___')

@@ -40,8 +40,8 @@ with st.sidebar:
 
     json_app = test.loc[test['SK_ID_CURR'] == app_id].to_json(orient='records')
     predictions = predict(json_app)
-    new_app_pred = pd.read_json(predictions[0])
-    shap_values = pd.read_json(predictions[1])
+    new_app_pred = pd.read_json(predictions[0], orient='records')
+    shap_values = pd.read_json(predictions[1], orient='index')
     exp_values = predictions[2]
 
 
@@ -79,7 +79,6 @@ with tab1:
            value=float(pred_value),
            number={"font": {"color": "#404040"}},
            mode="gauge+number+delta",
-           # title={'text': "Default Risk", 'font': {'size': 50}, 'align': 'center'},
            delta={'reference': 0.3, 'decreasing': {'color': '#3D9970'}, 'increasing': {'color': '#FF4136'}},
            gauge={'axis': {'range': [None, 1]},
                   'bgcolor': '#F2F2F2',

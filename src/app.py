@@ -31,7 +31,7 @@ train, test, feats, = load_data()
 
 
 with st.sidebar:
-    image = Image.open(path/'place_marche_logo.png')
+    image = Image.open(path/'resources'/'place_marche_logo.png')
     st.image(image)
     st.header("Scoring Client")
 

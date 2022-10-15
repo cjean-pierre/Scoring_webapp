@@ -44,8 +44,8 @@ with st.sidebar:
     prediction = predict_score(json_app)
     new_app_pred = pd.read_json(prediction, orient='records')
     contribs = predict_shap(json_app)
-    shap_values = pd.read_json(contribs[0], orient='index')
-    exp_values = contribs[1]
+    shap_values = pd.read_json(contribs[0], orient='index').values
+    exp_values = pd.read_json(contribs[1], orient='index').values
 
 
 tab1, tab2, tab3 = st.tabs(["SCORING   ", "PERSONAL   ", "INCOME & EMPLOYMENT"])
@@ -124,7 +124,7 @@ with tab1:
     with col3:
         st.subheader("Annuity")
         # annuity_value = test.loc[test['SK_ID_CURR'] == app_id, 'APPLI_AMT_ANNUITY']
-        annuity_value = new_app_pred['APLI_AMT_ANNUITY']
+        annuity_value = new_app_pred['APPLI_AMT_ANNUITY']
         median_annuity = train['APPLI_AMT_ANNUITY'].median()
 
         fig4 = go.Figure(go.Indicator(
@@ -273,7 +273,7 @@ with tab2:
     col1.metric(label="Age", value=f"{int(years)} years and {months} months", delta=age_delta)
 
     # display customer NAME_EDUCATION_TYPE & NAME_HOUSING_TYPE
-    ed_fam_df = test[['SK_ID_CURR', "NAME_EDUCATION_TYPE", "NAME_FAMILY_STATUS", "CNT_CHILDREN"]].copy()
+    ed_fam_df = test[['SK_ID_CURR', "NAME_EDUCATION_TYPE", "NAME_FAMILY_STATUS", "APPLI_CNT_CHILDREN"]].copy()
     education = ed_fam_df.loc[ed_fam_df['SK_ID_CURR'] == app_id, "NAME_EDUCATION_TYPE"].values[0]
 
     col4.metric(label="Education", value=f"{education}", delta=None)
@@ -284,7 +284,7 @@ with tab2:
     col2.metric(label="Family Status", value=f"{fam_status}", delta=None)
 
     # display customer CNT_CHILDREN
-    children = int(ed_fam_df.loc[ed_fam_df['SK_ID_CURR'] == app_id, "CNT_CHILDREN"].values[0])
+    children = int(ed_fam_df.loc[ed_fam_df['SK_ID_CURR'] == app_id, "APPLI_CNT_CHILDREN"].values[0])
     col3.metric(label="Children", value=f"{children}", delta=None)
 
     st.markdown('\n___')

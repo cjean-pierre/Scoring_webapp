@@ -6,14 +6,14 @@ import requests
 from fastapi import Body
 import json
 
-def predict_score(json_app: dict = Body({})):
+def predict_score(json_app: str):
 
     model_api_url = 'https://place-de-marche-ml.herokuapp.com/predict'
     try:
         response = requests.post(
             url=model_api_url,
             headers={'content-type': 'application/json'},
-            params={"json_app": json.dumps(json_app)}
+            json=json_app
         )
         response.raise_for_status()
         output = response.json()['new_apps_prediction']
@@ -23,13 +23,13 @@ def predict_score(json_app: dict = Body({})):
     return output
 
 
-def predict_shap(json_app: dict = Body({})):
+def predict_shap(json_app: str):
     model_api_url = 'https://place-de-marche-ml.herokuapp.com/shap'
     try:
         response = requests.post(
             url=model_api_url,
             headers={'content-type': 'application/json'},
-            params={"json_app": json.dumps(json_app)}
+            json=json_app
         )
         response.raise_for_status()
         output = [

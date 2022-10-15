@@ -165,7 +165,7 @@ with tab1:
                                      auto_size_plot=False,
                                      show=False),
                   clear_figure=True,
-                  use_container_width=True)
+                  )
     with col5:
         shap_summary = Image.open(path/'resources'/'shap_summary.png')
         st.image(shap_summary)

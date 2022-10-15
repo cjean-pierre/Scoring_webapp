@@ -12,7 +12,7 @@ from joblib import load
 from ml_model import predict_score
 from ml_model import predict_shap
 import shap
-import statsmodels.api as sm
+
 
 
 path = Path(__file__).parent

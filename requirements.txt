@@ -8,4 +8,4 @@ pillow
 shap
 streamlit
 pandas
-
+statsmodel

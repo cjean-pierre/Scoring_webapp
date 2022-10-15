@@ -12,7 +12,6 @@ from joblib import load
 from ml_model import predict_score
 from ml_model import predict_shap
 import shap
-import json
 
 
 path = Path(__file__).parent
@@ -157,8 +156,8 @@ with tab1:
         st.set_option('deprecation.showPyplotGlobalUse', False)
         cmap = matplotlib.colors.LinearSegmentedColormap.from_list('score_cmap', colors=cols, N=100)
         fig, ax = plt.subplots(figsize=(5, 10))
-        st.pyplot(shap.decision_plot(exp_values[index],
-                                     shap_values[index],
+        st.pyplot(shap.decision_plot(exp_values,
+                                     shap_values,
                                      feat_values[index],
                                      feature_names=feat_names,
                                      link='logit',

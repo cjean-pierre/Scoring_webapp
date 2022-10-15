@@ -7,7 +7,7 @@ import requests
 
 def predict_score(json_app: str):
 
-    model_api_url = 'https://place-de-marche-ml.herokuapp.com/predict'
+    model_api_url = 'https://pret-a-depenser-ml.herokuapp.com/predict'
     try:
         response = requests.post(
             url=model_api_url,
@@ -23,7 +23,7 @@ def predict_score(json_app: str):
 
 
 def predict_shap(json_app: str):
-    model_api_url = 'https://place-de-marche-ml.herokuapp.com/shap'
+    model_api_url = 'https://pret-a-depenser-ml.herokuapp.com/shap'
     try:
         response = requests.post(
             url=model_api_url,
@@ -39,6 +39,7 @@ def predict_shap(json_app: str):
     except (requests.HTTPError, IOError) as err:
         output = str(err)
     return output
+
 
 if __name__ == '__main__':
     # Example of a nerd joke

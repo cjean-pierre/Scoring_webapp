@@ -3,8 +3,7 @@ Function that sends a request to the MLflow model REST API to get score predicti
 """
 
 import requests
-from fastapi import Body
-import json
+
 
 def predict_score(json_app: str):
 
